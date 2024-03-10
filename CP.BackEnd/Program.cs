@@ -47,7 +47,6 @@ namespace CP.BackEnd
 
             app.UseAuthorization();
 
-
             app.MapControllers();
 
             app.Run();
