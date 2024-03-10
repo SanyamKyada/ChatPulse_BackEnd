@@ -1,0 +1,6 @@
+@CP.BackEnd_HostAddress = http://localhost:5212
+
+GET {{CP.BackEnd_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
