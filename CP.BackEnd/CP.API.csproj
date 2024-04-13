@@ -20,6 +20,7 @@
   <ItemGroup>
     <ProjectReference Include="..\CP.Models\CP.Models.csproj" />
     <ProjectReference Include="..\CP.Services\CP.Services.csproj" />
+    <ProjectReference Include="..\CP.SignalR\CP.SignalR.csproj" />
   </ItemGroup>
 
 </Project>
