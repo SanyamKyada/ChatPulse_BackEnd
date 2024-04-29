@@ -47,5 +47,9 @@ namespace CP.API.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving messages for this conversation.");
             }
         }
+
+        [HttpPut("{conversationId}/messages/seen/{seenByUserId}")]
+        public async Task UpdateMessageStatus(int conversationId, string seenByUserId)
+            => await _messageService.SetMessageSeen(conversationId, seenByUserId);
     }
 }

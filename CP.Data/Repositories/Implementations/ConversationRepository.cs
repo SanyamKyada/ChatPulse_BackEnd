@@ -26,7 +26,7 @@ namespace CP.Data.Repositories.Implementations
                         IsOnline = c.User2.IsOnline,
                         LastSeenTimestamp = c.User2.LastSeenTimestamp,
                         
-                    } :  new ContactDto
+                    } : new ContactDto
                     {
                         ContactId = c.User1Id,
                         Name = c.User1.Name,
@@ -46,5 +46,12 @@ namespace CP.Data.Repositories.Implementations
 
             return recentConversations;
         }
+
+        public async Task<List<string>> GetOnlineContactsAsync(string userId) =>
+            await _dbContext.Conversations
+                    .Where(c => (c.User1Id == userId || c.User2Id == userId) 
+                        && (c.User1Id == userId ? c.User2.IsOnline : c.User1.IsOnline))
+                    .Select(x => x.User1Id == userId ? x.User2Id : x.User1Id)
+                    .ToListAsync();
     }
 }

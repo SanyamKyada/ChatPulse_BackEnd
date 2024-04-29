@@ -1,5 +1,6 @@
 ﻿using CP.Data.Domain;
 using CP.Data.Repositories.Interfaces;
+using CP.Models.Entities;
 using CP.Models.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,9 +14,10 @@ namespace CP.Data.Repositories.Implementations
         {
             var messages = await _dbContext.Messages
                 .Where(m => m.ConversationId == conversationId)
-                .OrderBy(m => m.Timestamp)
+                .OrderByDescending(m => m.Timestamp)
                 .Skip(skip)
                 .Take(take)
+                .OrderBy(m => m.Timestamp)
                 .Select(m => new MessageDto
                 {
                     MessageId = m.Id,
@@ -26,6 +28,46 @@ namespace CP.Data.Repositories.Implementations
                 .ToListAsync();
 
             return messages;
+        }
+
+        public async Task InsertMessage(int conversationId, string content, string senderId)
+        {
+            var message = new Message() { 
+                Content = content,
+                SenderId = senderId,
+                ConversationId = conversationId,
+                Timestamp = DateTime.Now
+            };
+
+            await _dbContext.Messages.AddAsync(message);
+            _dbContext.SaveChanges();
+        }
+
+        public async Task SetMessageSeen(int conversationId, string seenByUserId)
+        {
+            var conversation = await _dbContext.Conversations.FirstOrDefaultAsync(x => x.Id == conversationId);
+
+            if(conversation.User1Id == seenByUserId)
+            {
+                conversation.User1LastSeen = DateTime.Now;
+            }
+            else
+            {
+                conversation.User2LastSeen = DateTime.Now;
+            }
+            _dbContext.Update(conversation);
+
+            var messages = await _dbContext.Messages.Where(x => x.ConversationId == conversationId && x.SeenByUserId == null).ToListAsync();
+
+            messages.ForEach(x =>
+            {
+                x.SeenByUserId = seenByUserId;
+                x.SeenAt = DateTime.Now;
+            });
+
+            _dbContext.UpdateRange(messages);
+
+            await _dbContext.SaveChangesAsync();
         }
     }
 }
