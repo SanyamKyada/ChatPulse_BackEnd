@@ -103,7 +103,8 @@ namespace CP.BackEnd.Controllers
                     return Ok(new { 
                         jwtToken = new JwtSecurityTokenHandler().WriteToken(token),
                         refreshToken = await _refereshTokenService.GenerateToken(user.Id),
-                        userId = user.Id 
+                        userId = user.Id ,
+                        userN = user.Name
                     });
                 }
                 else

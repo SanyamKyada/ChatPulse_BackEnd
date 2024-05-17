@@ -8,10 +8,11 @@ using System.Security.Claims;
 namespace CP.SignalR.Hubs
 {
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public class ChatHub(SharedDb shared, IUserService userService) : Hub
+    public class ChatHub(SharedDb shared, IUserService userService, IMessageService messageService) : Hub
     {
 
         private readonly IUserService _userService = userService;
+        private readonly IMessageService _messageService = messageService;
 
         public async Task SendMessage(string receiverUserId, string message, int conversationId)
         {
@@ -37,6 +38,16 @@ namespace CP.SignalR.Hubs
             await _userService.SetUserStatusAsync(userId, false);
             await NotifyContactsOfStatusChange(userId, false);
             await base.OnDisconnectedAsync(exception);
+        }
+
+        public async Task NotifyTyping()
+        {
+            string userId = Context.User?.Claims.FirstOrDefault(x => x.Type ==    ClaimTypes.NameIdentifier)?.Value;
+            var onlineContacts = await GetOnlineContacts(userId);
+            foreach (var contactId in onlineContacts)
+            {
+                await Clients.User(contactId).SendAsync("ReceiveTypingNotification", userId);
+            }
         }
 
         private async Task NotifyContactsOfStatusChange(string userId, bool isOnline)

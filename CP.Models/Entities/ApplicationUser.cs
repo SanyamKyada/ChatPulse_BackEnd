@@ -11,11 +11,16 @@ namespace CP.Models.Entities
         [Required]
         [MaxLength(100)]
         public string? Name { get; set; }
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
         public bool IsOnline { get; set; } = false;
 
         public DateTime? LastSeenTimestamp { get; set; }
 
         public virtual ICollection<Conversation> ConversationsAsUser1 { get; set; }
         public virtual ICollection<Conversation> ConversationsAsUser2 { get; set; }
+
+        public virtual ICollection<FriendRequest> FriendRequestSender { get; set; }
+        public virtual ICollection<FriendRequest> FriendRequestReceiver { get; set; }
     }
 }

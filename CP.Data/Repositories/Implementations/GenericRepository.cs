@@ -40,9 +40,9 @@ namespace CP.Data.Repositories.Implementations
             entities.Add(t);
         }
 
-        public void Save()
+        public Task Save()
         {
-            _context.SaveChangesAsync();
+            return _context.SaveChangesAsync();
         }
 
         public void Update(T t)

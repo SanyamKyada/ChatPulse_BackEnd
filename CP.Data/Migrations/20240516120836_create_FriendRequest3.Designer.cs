@@ -4,6 +4,7 @@ using CP.Data.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CP.Data.Migrations
 {
     [DbContext(typeof(CPDatabaseContext))]
-    partial class CPDatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20240516120836_create_FriendRequest3")]
+    partial class create_FriendRequest3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -147,6 +150,10 @@ namespace CP.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("ReceiverId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ReceiverUserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -165,9 +172,7 @@ namespace CP.Data.Migrations
 
                     b.HasIndex("ReceiverUserId");
 
-                    b.HasIndex("SenderUserId", "ReceiverUserId")
-                        .IsUnique()
-                        .HasDatabaseName("UQ_SenderReceiverUserIds");
+                    b.HasIndex("SenderUserId");
 
                     b.ToTable("FriendRequests");
                 });

@@ -11,6 +11,6 @@ namespace CP.Data.Repositories.Interfaces
         void Insert(T t);
         void Update(T t);
         void Delete(T t);
-        void Save();
+        Task Save();
     }
 }

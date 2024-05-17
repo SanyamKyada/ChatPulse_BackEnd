@@ -6,13 +6,9 @@ using System.Security.Claims;
 
 namespace CP.Services.Implementations
 {
-    public class AccountService( UserManager<ApplicationUser> userManager, 
-        RoleManager<IdentityRole> roleManager, SignInManager<ApplicationUser> signInManager ) : IAccountService
+    public class AccountService( UserManager<ApplicationUser> _userManager, 
+        RoleManager<IdentityRole> _roleManager, SignInManager<ApplicationUser> _signInManager ) : IAccountService
     {
-        private readonly UserManager<ApplicationUser> _userManager = userManager;
-        private readonly RoleManager<IdentityRole> _roleManager = roleManager;
-        private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
-
         public async Task<Status> RegisterAsync(RegistrationModel model)
         {
             var status = new Status();
@@ -28,6 +24,8 @@ namespace CP.Services.Implementations
                 Email = model.Email,
                 SecurityStamp = Guid.NewGuid().ToString(),
                 UserName = model.Email,
+                LastName = model.LastName,
+                FirstName = model.FirstName,
                 Name = model.LastName + ' ' + model.FirstName,
                 EmailConfirmed = true,
                 PhoneNumberConfirmed = true

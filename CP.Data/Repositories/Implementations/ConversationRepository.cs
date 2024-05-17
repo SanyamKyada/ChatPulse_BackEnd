@@ -5,10 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CP.Data.Repositories.Implementations
 {
-    public class ConversationRepository(CPDatabaseContext dbContext) : IConversationRepository
+    public class ConversationRepository(CPDatabaseContext _dbContext) : IConversationRepository
     {
-        private readonly CPDatabaseContext _dbContext = dbContext;
-
         public async Task<List<ConversationSummaryDto>> GetRecentChatsAsync(string userId)
         {
             var recentConversations = await _dbContext.Conversations
@@ -16,7 +14,7 @@ namespace CP.Data.Repositories.Implementations
                 .Select(c => new ConversationSummaryDto
                 {
                     ConversationId = c.Id,
-                    NumberOfUnseenMessages = c.Messages.Count(m => m.SeenByUserId != userId 
+                    NumberOfUnseenMessages = c.Messages.Count(m => m.SenderId != userId && m.SeenByUserId == null
                         && m.Timestamp > (c.User1Id == userId ? c.User2LastSeen : c.User1LastSeen)),
                     Contact = c.User1Id == userId ? new ContactDto
                     {
@@ -42,6 +40,7 @@ namespace CP.Data.Repositories.Implementations
                         Timestamp = c.Messages.OrderByDescending(m => m.Timestamp).First().Timestamp
                     }
                 })
+                .OrderByDescending(conversation => conversation.LastMessage.Timestamp)
                 .ToListAsync();
 
             return recentConversations;
@@ -51,6 +50,12 @@ namespace CP.Data.Repositories.Implementations
             await _dbContext.Conversations
                     .Where(c => (c.User1Id == userId || c.User2Id == userId) 
                         && (c.User1Id == userId ? c.User2.IsOnline : c.User1.IsOnline))
+                    .Select(x => x.User1Id == userId ? x.User2Id : x.User1Id)
+                    .ToListAsync();
+
+        public async Task<List<string>> GetAllContactsAsync(string userId) =>
+            await _dbContext.Conversations
+                    .Where(c => c.User1Id == userId || c.User2Id == userId)
                     .Select(x => x.User1Id == userId ? x.User2Id : x.User1Id)
                     .ToListAsync();
     }
