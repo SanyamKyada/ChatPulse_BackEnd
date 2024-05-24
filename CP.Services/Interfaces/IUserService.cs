@@ -7,6 +7,6 @@ namespace CP.Services.Interfaces
         Task SetUserStatusAsync(string userId, bool isOnline);
         Task<List<string>> GetOnlineContacts(string userId);
         Task<List<ContactSearchDto>> SearchPeople(string userId, string query, CancellationToken cancellationToken);
-        Task SendFriendRequest(FriendRequestDto request);
+        Task<ContactSearchDto> GetFriendRequestSenderUser(string userId);
     }
 }

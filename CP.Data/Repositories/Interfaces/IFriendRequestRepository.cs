@@ -2,7 +2,7 @@
 
 namespace CP.Data.Repositories.Interfaces
 {
-    public interface IFriendRequestService : IGenericRepository<FriendRequest>
+    public interface IFriendRequestRepository : IGenericRepository<FriendRequest>
     {
     }
 }

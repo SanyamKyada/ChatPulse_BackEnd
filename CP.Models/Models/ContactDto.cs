@@ -7,5 +7,6 @@
         public string ProfileImage { get; set; }
         public bool IsOnline { get; set; }
         public DateTime? LastSeenTimestamp { get; set; }
+        public bool IsFriend { get; set; }
     }
 }

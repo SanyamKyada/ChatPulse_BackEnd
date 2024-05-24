@@ -4,10 +4,10 @@ using CP.Models.Entities;
 
 namespace CP.Data.Repositories.Implementations
 {
-    public class FriendRequestService : GenericRepository<FriendRequest> ,IFriendRequestService
+    public class FriendRequestRepository : GenericRepository<FriendRequest> ,IFriendRequestRepository
     {
         private readonly CPDatabaseContext _dbContext;
-        public FriendRequestService(CPDatabaseContext dbContext) : base(dbContext)
+        public FriendRequestRepository(CPDatabaseContext dbContext) : base(dbContext)
         {
             _dbContext = dbContext;
         }

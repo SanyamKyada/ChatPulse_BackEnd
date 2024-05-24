@@ -15,6 +15,7 @@ namespace CP.Data.Domain
         public DbSet<Message> Messages { get; set; }
         public DbSet<RefreshToken> RefreshToken { get; set; }
         public DbSet<FriendRequest> FriendRequests { get; set; }
+        public DbSet<FriendRequestMessage> FriendRequestMessages { get; set; }
 
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {

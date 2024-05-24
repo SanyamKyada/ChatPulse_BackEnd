@@ -29,7 +29,7 @@ namespace CP.API.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while retrieving recent chats for user: {userId}", userId);
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving messages for this conversation.");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred while retrieving conversations for user: {userId}.");
             }
         }
 
@@ -44,7 +44,7 @@ namespace CP.API.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while retrieving messages for conversation: {conversationId}", conversationId);
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving messages for this conversation.");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred while retrieving messages for conversation: {conversationId}.");
             }
         }
 

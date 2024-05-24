@@ -4,6 +4,7 @@ using CP.Data.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CP.Data.Migrations
 {
     [DbContext(typeof(CPDatabaseContext))]
-    partial class CPDatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20240519174522_alter_FriendRequests")]
+    partial class alter_FriendRequests
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -173,31 +176,6 @@ namespace CP.Data.Migrations
                         .HasDatabaseName("UQ_SenderReceiverUserIds");
 
                     b.ToTable("FriendRequests");
-                });
-
-            modelBuilder.Entity("CP.Models.Entities.FriendRequestMessage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("FriendRequestId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FriendRequestId");
-
-                    b.ToTable("FriendRequestMessages");
                 });
 
             modelBuilder.Entity("CP.Models.Entities.Message", b =>
@@ -434,16 +412,6 @@ namespace CP.Data.Migrations
                     b.Navigation("SenderUser");
                 });
 
-            modelBuilder.Entity("CP.Models.Entities.FriendRequestMessage", b =>
-                {
-                    b.HasOne("CP.Models.Entities.FriendRequest", "FriendRequest")
-                        .WithMany("FriendRequestMessages")
-                        .HasForeignKey("FriendRequestId")
-                        .IsRequired();
-
-                    b.Navigation("FriendRequest");
-                });
-
             modelBuilder.Entity("CP.Models.Entities.Message", b =>
                 {
                     b.HasOne("CP.Models.Entities.Conversation", "Conversation")
@@ -520,11 +488,6 @@ namespace CP.Data.Migrations
             modelBuilder.Entity("CP.Models.Entities.Conversation", b =>
                 {
                     b.Navigation("Messages");
-                });
-
-            modelBuilder.Entity("CP.Models.Entities.FriendRequest", b =>
-                {
-                    b.Navigation("FriendRequestMessages");
                 });
 #pragma warning restore 612, 618
         }

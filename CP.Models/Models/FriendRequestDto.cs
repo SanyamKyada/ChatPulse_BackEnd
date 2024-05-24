@@ -4,5 +4,7 @@
     {
         public string UserId { get; set; }
         public string ReceiverUserId { get; set; }
+        public bool HasWaved { get; set; }
+        public string Message { get; set; }
     }
 }

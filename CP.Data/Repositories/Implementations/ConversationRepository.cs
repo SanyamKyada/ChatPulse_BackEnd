@@ -1,5 +1,6 @@
 ﻿using CP.Data.Domain;
 using CP.Data.Repositories.Interfaces;
+using CP.Models.Entities;
 using CP.Models.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,7 +24,8 @@ namespace CP.Data.Repositories.Implementations
                         ProfileImage = c.User2.ProfileImage,
                         IsOnline = c.User2.IsOnline,
                         LastSeenTimestamp = c.User2.LastSeenTimestamp,
-                        
+                        IsFriend = true
+
                     } : new ContactDto
                     {
                         ContactId = c.User1Id,
@@ -31,6 +33,7 @@ namespace CP.Data.Repositories.Implementations
                         ProfileImage = c.User1.ProfileImage,
                         IsOnline = c.User1.IsOnline,
                         LastSeenTimestamp = c.User1.LastSeenTimestamp,
+                        IsFriend = true
                     },
                     //ConversationType = c.ConversationType,
                     LastMessage = new MessageDto
@@ -40,10 +43,43 @@ namespace CP.Data.Repositories.Implementations
                         Timestamp = c.Messages.OrderByDescending(m => m.Timestamp).First().Timestamp
                     }
                 })
-                .OrderByDescending(conversation => conversation.LastMessage.Timestamp)
                 .ToListAsync();
 
-            return recentConversations;
+            var friendRequests = await _dbContext.FriendRequests
+                .Where(x => (x.SenderUserId == userId || x.ReceiverUserId == userId) && x.Status == FriendRequestStatus.Pending)
+                .Select(fr => new ConversationSummaryDto() {
+                    FriendRequestId = fr.Id,
+                    NumberOfUnseenMessages = 1,
+                    Contact = fr.SenderUserId == userId ? new ContactDto
+                    {
+                        ContactId = fr.ReceiverUserId,
+                        Name = fr.ReceiverUser.Name,
+                        ProfileImage = fr.ReceiverUser.ProfileImage,
+                        IsOnline = fr.ReceiverUser.IsOnline,
+                        LastSeenTimestamp = fr.ReceiverUser.LastSeenTimestamp,
+                        IsFriend = false
+
+                    } : new ContactDto
+                    {
+                        ContactId = fr.SenderUserId,
+                        Name = fr.SenderUser.Name,
+                        ProfileImage = fr.SenderUser.ProfileImage,
+                        IsOnline = fr.SenderUser.IsOnline,
+                        LastSeenTimestamp = fr.SenderUser.LastSeenTimestamp,
+                        IsFriend = false
+                    },
+                    LastMessage = new MessageDto
+                    {
+                        MessageId = fr.FriendRequestMessages.OrderByDescending(m => m.Timestamp).First().Id,
+                        Content = fr.FriendRequestMessages.OrderByDescending(m => m.Timestamp).First().Content,
+                        Timestamp = fr.FriendRequestMessages.OrderByDescending(m => m.Timestamp).First().Timestamp
+                    }
+                })
+                .ToListAsync();
+
+            recentConversations.AddRange(friendRequests);
+
+            return recentConversations.OrderByDescending(conversation => conversation.LastMessage.Timestamp).ToList();
         }
 
         public async Task<List<string>> GetOnlineContactsAsync(string userId) =>

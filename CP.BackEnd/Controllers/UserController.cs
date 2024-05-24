@@ -22,19 +22,5 @@ namespace CP.API.Controllers
             userId = userId ?? User.Claims.FirstOrDefault(x => x.Type ==    ClaimTypes.NameIdentifier)?.Value;
             return Ok(await _userService.SearchPeople(userId, query, cancellationToken));
         }
-
-        [HttpPost("send-friend-request")]
-        public async Task<ActionResult<Status>> SendFriendRequest([FromBody]FriendRequestDto requestDto)
-        {
-            try
-            {
-                await _userService.SendFriendRequest(requestDto);
-                return Ok(new Status() { StatusCode = 200, Message = "Friend request sent successfully"});
-            }
-            catch (Exception ex)
-            {
-                return StatusCode((int)HttpStatusCode.InternalServerError, $"An error occurred while sending friend request: {ex.Message}");
-            }
-        }
     }
 }

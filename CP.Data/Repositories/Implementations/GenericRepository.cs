@@ -25,9 +25,9 @@ namespace CP.Data.Repositories.Implementations
         }
 
 
-        public T GetById(int id)
+        public async Task<T> GetById(int id)
         {
-            return entities.Find(id);
+            return await entities.FindAsync(id);
         }
 
         public void Delete(T t)
@@ -75,6 +75,12 @@ namespace CP.Data.Repositories.Implementations
             {
                 return query.ToList();
             }
+        }
+
+        public IQueryable<T> GetIQ()
+        {
+             IQueryable<T> query = entities;
+            return query;
         }
     }
 }

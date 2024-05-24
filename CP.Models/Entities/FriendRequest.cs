@@ -15,6 +15,9 @@ namespace CP.Models.Entities
         public virtual ApplicationUser ReceiverUser { get; set; }
         public FriendRequestStatus Status { get; set; }
         public DateTime RequestTimeStamp { get; set; }
+        public bool HasWaved {  get; set; }
+
+        public ICollection<FriendRequestMessage> FriendRequestMessages { get;}
     }
 
     public enum FriendRequestStatus

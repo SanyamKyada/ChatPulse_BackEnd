@@ -1,4 +1,5 @@
 
+using Azure.Core;
 using CP.Data.Domain;
 using CP.Data.Repositories.Implementations;
 using CP.Data.Repositories.Interfaces;
@@ -41,8 +42,20 @@ namespace CP.BackEnd
                     {
                         OnMessageReceived = context =>
                         {
-                            var accessToken = context.Request.Query["access_token"];
-                            context.Token = accessToken;
+                            //var accessToken = context.Request.Query["access_token"];
+                            //context.Token = accessToken;
+
+                            var authorizationHeader = context.Request.Headers["Authorization"].ToString();
+
+                            if (!string.IsNullOrEmpty(authorizationHeader) && authorizationHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                            {
+                                var accessToken = authorizationHeader.Substring("Bearer ".Length).Trim();
+                                context.Token = accessToken;
+                            }
+                            else if (!string.IsNullOrEmpty(context.Request.Query["access_token"]))
+                            {
+                                context.Token = context.Request.Query["access_token"];
+                            }
                             return  Task.CompletedTask;
                         }
                     };
@@ -66,11 +79,13 @@ namespace CP.BackEnd
             builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
             builder.Services.AddScoped<IMessageRepository, MessageRepository>();
             builder.Services.AddScoped<IRefereshTokenRepository, RefereshTokenRepository>();
-            builder.Services.AddScoped<IFriendRequestService, FriendRequestService>();
+            builder.Services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
+            builder.Services.AddScoped<IFriendRequestMessageRepository, FriendRequestMessageRepository>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IConversationService, ConversationService>();
             builder.Services.AddScoped<IMessageService, MessageService>();
             builder.Services.AddScoped<IRefereshTokenService, RefereshTokenService>();
+            builder.Services.AddScoped<IFriendRequestService, FriendRequestService>();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
