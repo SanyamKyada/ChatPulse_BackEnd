@@ -4,6 +4,7 @@ using CP.Data.Domain;
 using CP.Data.Repositories.Implementations;
 using CP.Data.Repositories.Interfaces;
 using CP.Models.Entities;
+using CP.Models.Models;
 using CP.Services.Implementations;
 using CP.Services.Interfaces;
 using CP.SignalR.DataService;
@@ -12,6 +13,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using System.Text;
 
 namespace CP.BackEnd
@@ -23,8 +25,8 @@ namespace CP.BackEnd
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-
-            var key = Encoding.ASCII.GetBytes("This is my security key:qwe123@@");
+            var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();
+            var key = Encoding.ASCII.GetBytes(jwtSettings.SecretKey);
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
@@ -34,8 +36,8 @@ namespace CP.BackEnd
                         ValidateAudience = true,
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
-                        ValidIssuer = "https://localhost:7003",
-                        ValidAudience = "http://localhost:5173",
+                        ValidIssuer = jwtSettings.Issuer,
+                        ValidAudience = jwtSettings.Audience,
                         IssuerSigningKey = new SymmetricSecurityKey(key)
                     };
                     options.Events = new JwtBearerEvents
@@ -57,6 +59,17 @@ namespace CP.BackEnd
                                 context.Token = context.Request.Query["access_token"];
                             }
                             return  Task.CompletedTask;
+                        },
+                        //Return 401 instead of redirecting to Login When authorization fails
+                        OnChallenge = context =>
+                        {
+                            context.HandleResponse();
+                            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                            context.Response.ContentType = "application/json";
+                            return context.Response.WriteAsync(JsonConvert.SerializeObject(new
+                            {
+                                error = "Unauthorized"
+                            }));
                         }
                     };
                 });
@@ -86,6 +99,7 @@ namespace CP.BackEnd
             builder.Services.AddScoped<IMessageService, MessageService>();
             builder.Services.AddScoped<IRefereshTokenService, RefereshTokenService>();
             builder.Services.AddScoped<IFriendRequestService, FriendRequestService>();
+            builder.Services.AddScoped<IEncryptionService, EncryptionService>();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();

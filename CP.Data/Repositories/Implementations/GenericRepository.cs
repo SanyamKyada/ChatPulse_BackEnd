@@ -40,6 +40,11 @@ namespace CP.Data.Repositories.Implementations
             entities.Add(t);
         }
 
+        public void InsertRange(List<T> t)
+        {
+            entities.AddRange(t);
+        }
+
         public Task Save()
         {
             return _context.SaveChangesAsync();

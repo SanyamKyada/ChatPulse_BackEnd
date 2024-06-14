@@ -1,4 +1,5 @@
-﻿using CP.Models.Models;
+﻿using CP.Models.Entities;
+using CP.Models.Models;
 using CP.Services.Interfaces;
 using CP.SignalR.Constants;
 using CP.SignalR.DataService;
@@ -10,11 +11,8 @@ using System.Security.Claims;
 namespace CP.SignalR.Hubs
 {
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public class ChatHub(SharedDb shared, IUserService userService, IMessageService messageService, IFriendRequestService _friendRequestService) : Hub
+    public class ChatHub(IUserService _userService, IMessageService _messageService, IFriendRequestService _friendRequestService) : Hub
     {
-
-        private readonly IUserService _userService = userService;
-        private readonly IMessageService _messageService = messageService;
 
         public async Task SendMessage(string receiverUserId, string message, int conversationId)
         {
@@ -45,7 +43,7 @@ namespace CP.SignalR.Hubs
             {
                 await _friendRequestService.InsertFriendRequestMessage(friendRequestId, requestDto.Message);
             }
-            var senderUser = await userService.GetFriendRequestSenderUser(senderUserId);
+            var senderUser = await _userService.GetFriendRequestSenderUser(senderUserId);
 
             await Clients.User(requestDto.ReceiverUserId).SendAsync(SignalRClient.ReceiveFriendRequest, friendRequestId, senderUser );
             return friendRequestId;
@@ -59,6 +57,11 @@ namespace CP.SignalR.Hubs
                 await _friendRequestService.InsertFriendRequestMessage(friendRequestId, message);
 
             await Clients.User(receiverUserId).SendAsync(SignalRClient.ReceiveFriendRequestMessage, senderUserId, friendRequestId, message );
+        }
+
+        public async Task SendFriendRequestAccepted(int friendRequestId, int conversationId, string receiverUserId)
+        {
+            await Clients.User(receiverUserId).SendAsync(SignalRClient.ReceiveFriendRequestAccepted, friendRequestId, conversationId);
         }
 
         public async override Task OnConnectedAsync()

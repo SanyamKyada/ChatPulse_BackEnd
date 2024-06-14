@@ -6,9 +6,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CP.Data.Repositories.Implementations
 {
-    public class MessageRepository(CPDatabaseContext dbContext) : IMessageRepository
+    public class MessageRepository: GenericRepository<Message>, IMessageRepository
     {
-        private readonly CPDatabaseContext _dbContext = dbContext;
+        private readonly CPDatabaseContext _dbContext;
+        public MessageRepository(CPDatabaseContext dbContext): base(dbContext)
+        {
+            _dbContext = dbContext;
+        }
 
         public async Task<IEnumerable<MessageDto>> GetByConversationAsync(int conversationId, string userId, int skip, int take)
         {

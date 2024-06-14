@@ -9,6 +9,7 @@ namespace CP.Data.Repositories.Interfaces
         public IEnumerable<T> Get(Expression<Func<T, bool>> filter = null, Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null, string includeProperties = "");
         Task<T> GetById(int id);
         void Insert(T t);
+        void InsertRange(List<T> t);
         void Update(T t);
         void Delete(T t);
         Task Save();

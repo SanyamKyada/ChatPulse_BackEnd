@@ -1,9 +1,12 @@
 ﻿using CP.Models.Models;
 using CP.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CP.API.Controllers
 {
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/conversation")]
     [ApiController]
     public class ConversationController : ControllerBase

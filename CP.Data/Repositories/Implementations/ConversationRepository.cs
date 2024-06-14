@@ -6,8 +6,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CP.Data.Repositories.Implementations
 {
-    public class ConversationRepository(CPDatabaseContext _dbContext) : IConversationRepository
+    public class ConversationRepository : GenericRepository<Conversation>, IConversationRepository
     {
+        private readonly CPDatabaseContext _dbContext;
+        private readonly IFriendRequestRepository _friendRequestRepository;
+        public ConversationRepository(CPDatabaseContext dbContext, IFriendRequestRepository friendRequestRepository) : base(dbContext)
+        {
+            _dbContext = dbContext;
+            _friendRequestRepository = friendRequestRepository;
+        }
+
         public async Task<List<ConversationSummaryDto>> GetRecentChatsAsync(string userId)
         {
             var recentConversations = await _dbContext.Conversations
@@ -36,18 +44,27 @@ namespace CP.Data.Repositories.Implementations
                         IsFriend = true
                     },
                     //ConversationType = c.ConversationType,
-                    LastMessage = new MessageDto
+                    LastMessage = c.Messages.Count() > 0 ? new MessageDto
                     {
                         MessageId = c.Messages.OrderByDescending(m => m.Timestamp).First().Id,
                         Content = c.Messages.OrderByDescending(m => m.Timestamp).First().Content,
                         Timestamp = c.Messages.OrderByDescending(m => m.Timestamp).First().Timestamp
                     }
+                    : 
+                    _friendRequestRepository.GetIQ().Where(x => x.Status == FriendRequestStatus.Accepted && (c.User1Id == x.SenderUserId && c.User2Id == x.ReceiverUserId) ||
+                        (c.User1Id == x.ReceiverUserId && c.User2Id == x.SenderUserId))
+                        .Select(z => new MessageDto()
+                        {
+                            IsWave = true,
+                            Timestamp = z.RequestTimeStamp
+                        }).FirstOrDefault()
                 })
                 .ToListAsync();
 
             var friendRequests = await _dbContext.FriendRequests
                 .Where(x => (x.SenderUserId == userId || x.ReceiverUserId == userId) && x.Status == FriendRequestStatus.Pending)
-                .Select(fr => new ConversationSummaryDto() {
+                .Select(fr => new ConversationSummaryDto()
+                {
                     FriendRequestId = fr.Id,
                     NumberOfUnseenMessages = 1,
                     Contact = fr.SenderUserId == userId ? new ContactDto
@@ -68,12 +85,18 @@ namespace CP.Data.Repositories.Implementations
                         LastSeenTimestamp = fr.SenderUser.LastSeenTimestamp,
                         IsFriend = false
                     },
-                    LastMessage = new MessageDto
+                    LastMessage = fr.FriendRequestMessages.Count() > 0
+                        ? new MessageDto
                     {
                         MessageId = fr.FriendRequestMessages.OrderByDescending(m => m.Timestamp).First().Id,
                         Content = fr.FriendRequestMessages.OrderByDescending(m => m.Timestamp).First().Content,
                         Timestamp = fr.FriendRequestMessages.OrderByDescending(m => m.Timestamp).First().Timestamp
                     }
+                        : new MessageDto
+                        {
+                            IsWave = true,
+                            Timestamp = fr.RequestTimeStamp
+                        }
                 })
                 .ToListAsync();
 

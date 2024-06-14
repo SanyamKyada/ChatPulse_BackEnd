@@ -8,6 +8,7 @@ using System.Net;
 using System.Security.Claims;
 using System.Text;
 using CP.Models.Entities;
+using Newtonsoft.Json;
 
 namespace CP.BackEnd.Controllers
 {
@@ -17,16 +18,18 @@ namespace CP.BackEnd.Controllers
     {
         private readonly IAccountService _accountService;
         private readonly IRefereshTokenService _refereshTokenService;
+        private readonly IEncryptionService _encryptionService;
         private readonly IConfiguration _config;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
 
-        public AccountController(IAccountService accountService,IRefereshTokenService refereshTokenService, IConfiguration config, UserManager<ApplicationUser> userManager,
+        public AccountController(IAccountService accountService, IRefereshTokenService refereshTokenService, IEncryptionService encryptionService, IConfiguration config, UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager, RoleManager<IdentityRole> roleManager)
         {
             _accountService = accountService;
             _refereshTokenService = refereshTokenService;
+            _encryptionService = encryptionService;
             _config = config;
             _userManager = userManager;
             _signInManager = signInManager;
@@ -55,8 +58,11 @@ namespace CP.BackEnd.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginModel userCred)
+        public async Task<IActionResult> Login([FromBody] EncryptedData encryptedData)
         {
+            var decryptedData = _encryptionService.Decrypt(encryptedData.Data);
+            var userCred = JsonConvert.DeserializeObject<LoginModel>(decryptedData);
+
             if (userCred.Email is null || userCred.Password is null)
             {
                 return BadRequest("Email or password is missing.");
@@ -100,10 +106,11 @@ namespace CP.BackEnd.Controllers
                     );
 
                     // JWT token as a response
-                    return Ok(new { 
+                    return Ok(new
+                    {
                         jwtToken = new JwtSecurityTokenHandler().WriteToken(token),
                         refreshToken = await _refereshTokenService.GenerateToken(user.Id),
-                        userId = user.Id ,
+                        userId = user.Id,
                         userN = user.Name
                     });
                 }
@@ -175,5 +182,9 @@ namespace CP.BackEnd.Controllers
             };
 
         }
+    }
+    public class EncryptedData
+    {
+        public string Data { get; set; }
     }
 }

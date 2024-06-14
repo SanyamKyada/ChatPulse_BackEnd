@@ -7,6 +7,6 @@
         public int NumberOfUnseenMessages { get; set; }
         public ContactDto Contact { get; set; }
         public int ConversationType { get; set; }
-        public MessageDto LastMessage { get; set; }
+        public MessageDto? LastMessage { get; set; }
     }
 }
