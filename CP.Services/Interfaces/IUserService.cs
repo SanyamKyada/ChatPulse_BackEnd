@@ -8,5 +8,6 @@ namespace CP.Services.Interfaces
         Task<List<string>> GetOnlineContacts(string userId);
         Task<List<ContactSearchDto>> SearchPeople(string userId, string query, CancellationToken cancellationToken);
         Task<ContactSearchDto> GetFriendRequestSenderUser(string userId);
+        Task<Status> SetAvailabilityStatus(AvailabilityStatusModel availabilityStatus);
     }
 }

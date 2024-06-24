@@ -1,10 +1,8 @@
-﻿using CP.Models.Entities;
-using CP.Models.Models;
+﻿using CP.Models.Models;
 using CP.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace CP.API.Controllers
 {

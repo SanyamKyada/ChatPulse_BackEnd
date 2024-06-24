@@ -13,6 +13,7 @@ namespace CP.SignalR.Constants
         public const string ReceiveFriendRequest = "ReceiveFriendRequest";
         public const string ReceiveFriendRequestMessage = "ReceiveFriendRequestMessage";
         public const string UserStatusChanged = "UserStatusChanged";
+        public const string ReceiveAvailabilityStatusChanged = "ReceiveAvailabilityStatusChanged";
         public const string ReceiveFriendRequestAccepted = "ReceiveFriendRequestAccepted";
 
     }

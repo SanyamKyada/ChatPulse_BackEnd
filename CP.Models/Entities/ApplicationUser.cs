@@ -15,6 +15,8 @@ namespace CP.Models.Entities
         public string? LastName { get; set; }
         public bool IsOnline { get; set; } = false;
 
+        public AvailabilityStatus AvailabilityStatus { get; set; } = AvailabilityStatus.Active;
+            
         public DateTime? LastSeenTimestamp { get; set; }
 
         public virtual ICollection<Conversation> ConversationsAsUser1 { get; set; }
@@ -22,5 +24,13 @@ namespace CP.Models.Entities
 
         public virtual ICollection<FriendRequest> FriendRequestSender { get; set; }
         public virtual ICollection<FriendRequest> FriendRequestReceiver { get; set; }
+    }
+
+    public enum AvailabilityStatus
+    {
+        Active = 1,
+        Away,
+        DoNotDisturb,
+        Invisible
     }
 }

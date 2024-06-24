@@ -23,6 +23,17 @@ namespace CP.SignalR.Hubs
             await Clients.User(receiverUserId).SendAsync(SignalRClient.ReceiveMessage, senderUserId, message);
         }
 
+        public async Task SendAvailabilityStatusChanged(AvailabilityStatusModel availabilityStatus)
+        {
+            string userId = availabilityStatus.UserId ?? Context.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+
+            var onlineContacts = await GetOnlineContacts(userId);
+            foreach (var contactId in onlineContacts)
+            {
+                await Clients.User(contactId).SendAsync(SignalRClient.ReceiveAvailabilityStatusChanged, userId, availabilityStatus.Status);
+            }
+        }
+
         public async Task NotifyTyping()
         {
             string userId = Context.User?.Claims.FirstOrDefault(x => x.Type ==    ClaimTypes.NameIdentifier)?.Value;

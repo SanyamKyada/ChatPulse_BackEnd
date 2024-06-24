@@ -1,4 +1,6 @@
-﻿namespace CP.Models.Models
+﻿using CP.Models.Entities;
+
+namespace CP.Models.Models
 {
     public class ContactDto
     {
@@ -8,5 +10,6 @@
         public bool IsOnline { get; set; }
         public DateTime? LastSeenTimestamp { get; set; }
         public bool IsFriend { get; set; }
+        public AvailabilityStatus AvailabilityStatus { get; set; }
     }
 }

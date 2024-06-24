@@ -64,5 +64,24 @@ namespace CP.Services.Implementations
                 })
                 .FirstOrDefaultAsync() ?? new ContactSearchDto();
         }
+
+        public async Task<Status> SetAvailabilityStatus(AvailabilityStatusModel availabilityStatus)
+        {
+            var status = new Status();
+            var user = await _userManager.FindByIdAsync(availabilityStatus.UserId);
+
+            if (user == null)
+            {
+                status.StatusCode = 500;
+                status.Message = "User not found while updating availability status";
+                return status;
+            }
+            user.AvailabilityStatus = availabilityStatus.Status;
+            await _userManager.UpdateAsync(user);
+
+            status.StatusCode = 200;
+            status.Message = "Status updated successfuly";
+            return status;
+        }
     }
 }

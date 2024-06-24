@@ -37,19 +37,22 @@ namespace CP.BackEnd.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(RegistrationModel model)
+        public async Task<IActionResult> Register([FromBody] EncryptedData encryptedData)
         {
-            if (string.IsNullOrEmpty(model.Role))
+            var decryptedData = _encryptionService.Decrypt(encryptedData.Data);
+            var userCred = JsonConvert.DeserializeObject<RegistrationModel>(decryptedData);
+
+            if (string.IsNullOrEmpty(userCred.Role))
             {
-                model.Role = "User";
+                userCred.Role = "User";
             }
 
-            var result = await _accountService.RegisterAsync(model);
+            var result = await _accountService.RegisterAsync(userCred);
 
             /*return Ok(result.Message);*/
             if (result.StatusCode == 1)
             {
-                return Ok(new { from = "register", HttpStatusCode = 200 });
+                return Ok(new { Message = "Registeration successful", HttpStatusCode = 200 });
             }
             else
             {
@@ -63,7 +66,7 @@ namespace CP.BackEnd.Controllers
             var decryptedData = _encryptionService.Decrypt(encryptedData.Data);
             var userCred = JsonConvert.DeserializeObject<LoginModel>(decryptedData);
 
-            if (userCred.Email is null || userCred.Password is null)
+            if (userCred.UserName is null || userCred.Password is null)
             {
                 return BadRequest("Email or password is missing.");
             }
@@ -74,7 +77,7 @@ namespace CP.BackEnd.Controllers
                 if (result.StatusCode == 1)
                 {
                     // Get the user
-                    var user = await _userManager.FindByNameAsync(userCred.Email);
+                    var user = await _userManager.FindByNameAsync(userCred.UserName);
 
                     //Get the role
                     var roles = await _userManager.GetRolesAsync(user);
@@ -101,17 +104,20 @@ namespace CP.BackEnd.Controllers
                         jwtSettings.Issuer,
                         jwtSettings.Audience,
                         claims,
-                    expires: expires,
+                        expires: expires,
+                        //expires: DateTime.Now.AddSeconds(60),
                         signingCredentials: credentials
                     );
 
                     // JWT token as a response
                     return Ok(new
                     {
-                        jwtToken = new JwtSecurityTokenHandler().WriteToken(token),
+                        accessToken = new JwtSecurityTokenHandler().WriteToken(token),
                         refreshToken = await _refereshTokenService.GenerateToken(user.Id),
                         userId = user.Id,
-                        userN = user.Name
+                        userName = user.Name,
+                        availabilityStatus = user.AvailabilityStatus,
+                        email = user.Email
                     });
                 }
                 else
@@ -135,7 +141,7 @@ namespace CP.BackEnd.Controllers
             var jwtSettings = _config.GetSection("Jwt").Get<JwtSettings>();
             var tokenkey = Encoding.UTF8.GetBytes(jwtSettings.SecretKey);
             SecurityToken securityToken;
-            var principal = tokenhandler.ValidateToken(tokenResponse.jwttoken, new TokenValidationParameters
+            var principal = tokenhandler.ValidateToken(tokenResponse.accessToken, new TokenValidationParameters
             {
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(tokenkey),
@@ -143,7 +149,7 @@ namespace CP.BackEnd.Controllers
                 ValidIssuer = jwtSettings.Issuer,
                 ValidateAudience = true,
                 ValidAudience = jwtSettings.Audience,
-                ValidateLifetime = false 
+                ValidateLifetime = false
 
             }, out securityToken);
 
@@ -154,7 +160,7 @@ namespace CP.BackEnd.Controllers
             }
             var username = principal.Identity?.Name;
             var userId = principal.Claims.FirstOrDefault(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier").Value;
-            var exists = _refereshTokenService.TokenExists(userId, tokenResponse.refreshtoken);
+            var exists = _refereshTokenService.TokenExists(userId, tokenResponse.refreshToken);
             if (!exists == null)
                 return Unauthorized();
 
@@ -170,15 +176,16 @@ namespace CP.BackEnd.Controllers
 
             var token = new JwtSecurityToken(
               claims: claims,
-              expires: DateTime.Now.AddMinutes(15),
+              expires: DateTime.Now.AddMinutes(60),
               signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey)), SecurityAlgorithms.HmacSha256)
             );
 
             var jwttoken = new JwtSecurityTokenHandler().WriteToken(token);
 
-            return new TokenResponse() { 
-                jwttoken = jwttoken,
-                refreshtoken = await _refereshTokenService.GenerateToken(user) 
+            return new TokenResponse()
+            {
+                accessToken = jwttoken,
+                refreshToken = await _refereshTokenService.GenerateToken(user)
             };
 
         }

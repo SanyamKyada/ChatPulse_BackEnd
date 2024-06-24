@@ -32,8 +32,8 @@ namespace CP.Data.Repositories.Implementations
                         ProfileImage = c.User2.ProfileImage,
                         IsOnline = c.User2.IsOnline,
                         LastSeenTimestamp = c.User2.LastSeenTimestamp,
-                        IsFriend = true
-
+                        IsFriend = true,
+                        AvailabilityStatus = c.User2.AvailabilityStatus
                     } : new ContactDto
                     {
                         ContactId = c.User1Id,
@@ -41,7 +41,8 @@ namespace CP.Data.Repositories.Implementations
                         ProfileImage = c.User1.ProfileImage,
                         IsOnline = c.User1.IsOnline,
                         LastSeenTimestamp = c.User1.LastSeenTimestamp,
-                        IsFriend = true
+                        IsFriend = true,
+                        AvailabilityStatus = c.User1.AvailabilityStatus
                     },
                     //ConversationType = c.ConversationType,
                     LastMessage = c.Messages.Count() > 0 ? new MessageDto
@@ -74,7 +75,8 @@ namespace CP.Data.Repositories.Implementations
                         ProfileImage = fr.ReceiverUser.ProfileImage,
                         IsOnline = fr.ReceiverUser.IsOnline,
                         LastSeenTimestamp = fr.ReceiverUser.LastSeenTimestamp,
-                        IsFriend = false
+                        IsFriend = false,
+                        AvailabilityStatus = fr.ReceiverUser.AvailabilityStatus
 
                     } : new ContactDto
                     {
@@ -83,7 +85,8 @@ namespace CP.Data.Repositories.Implementations
                         ProfileImage = fr.SenderUser.ProfileImage,
                         IsOnline = fr.SenderUser.IsOnline,
                         LastSeenTimestamp = fr.SenderUser.LastSeenTimestamp,
-                        IsFriend = false
+                        IsFriend = false,
+                        AvailabilityStatus = fr.SenderUser.AvailabilityStatus
                     },
                     LastMessage = fr.FriendRequestMessages.Count() > 0
                         ? new MessageDto

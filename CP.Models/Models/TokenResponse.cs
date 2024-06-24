@@ -2,7 +2,7 @@
 {
     public class TokenResponse
     {
-        public string? jwttoken { get; set; }
-        public string? refreshtoken { get; set; }
+        public string? accessToken { get; set; }
+        public string? refreshToken { get; set; }
     }
 }

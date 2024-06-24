@@ -12,18 +12,25 @@ namespace CP.Services.Implementations
         public async Task<Status> RegisterAsync(RegistrationModel model)
         {
             var status = new Status();
-            var userExists = await _userManager.FindByEmailAsync(model.Email);
-            if (userExists != null)
+            var userNameExists = await _userManager.FindByNameAsync(model.Username);
+            if (userNameExists != null)
             {
                 status.StatusCode = 0;
-                status.Message = "User already exist";
+                status.Message = "Username already exist";
+                return status;
+            }
+            var emailExists = await _userManager.FindByEmailAsync(model.Email);
+            if (emailExists != null)
+            {
+                status.StatusCode = 0;
+                status.Message = "Email already exist";
                 return status;
             }
             ApplicationUser user = new ApplicationUser()
             {
                 Email = model.Email,
                 SecurityStamp = Guid.NewGuid().ToString(),
-                UserName = model.Email,
+                UserName = model.Username,
                 LastName = model.LastName,
                 FirstName = model.FirstName,
                 Name = model.LastName + ' ' + model.FirstName,
@@ -57,7 +64,7 @@ namespace CP.Services.Implementations
         public async Task<Status> LoginAsync(LoginModel model)
         {
             var status = new Status();
-            var user = await _userManager.FindByEmailAsync(model.Email);
+            var user = await _userManager.FindByNameAsync(model.UserName);
             if (user == null)
             {
                 status.StatusCode = 0;

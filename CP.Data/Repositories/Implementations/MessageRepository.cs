@@ -21,7 +21,6 @@ namespace CP.Data.Repositories.Implementations
                 .OrderByDescending(m => m.Timestamp)
                 .Skip(skip)
                 .Take(take)
-                .OrderBy(m => m.Timestamp)
                 .Select(m => new MessageDto
                 {
                     MessageId = m.Id,
@@ -36,7 +35,7 @@ namespace CP.Data.Repositories.Implementations
 
         public async Task InsertMessage(int conversationId, string content, string senderId)
         {
-            var message = new Message() { 
+            var message = new Message() {
                 Content = content,
                 SenderId = senderId,
                 ConversationId = conversationId,

@@ -25,5 +25,18 @@ namespace CP.API.Controllers
             userId = userId ?? User.Claims.FirstOrDefault(x => x.Type ==    ClaimTypes.NameIdentifier)?.Value;
             return Ok(await _userService.SearchPeople(userId, query, cancellationToken));
         }
+
+        [HttpPost("set-availability-status")]
+        public async Task<ActionResult<Status>> SetAvailabilityStatus(AvailabilityStatusModel availabilityStatus)
+        {
+            var response = await _userService.SetAvailabilityStatus(availabilityStatus);
+
+            if(response.StatusCode == 500)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, response);
+            }
+
+            return Ok(response);
+        }
     }
 }
