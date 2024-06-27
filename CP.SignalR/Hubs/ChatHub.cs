@@ -1,8 +1,6 @@
-﻿using CP.Models.Entities;
-using CP.Models.Models;
+﻿using CP.Models.Models;
 using CP.Services.Interfaces;
 using CP.SignalR.Constants;
-using CP.SignalR.DataService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
@@ -13,7 +11,34 @@ namespace CP.SignalR.Hubs
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class ChatHub(IUserService _userService, IMessageService _messageService, IFriendRequestService _friendRequestService) : Hub
     {
+        
+        //public readonly SharedDb _shared = shared;
+        //public async Task JoinChat(UserConnection conn)
+        //{
+        //    await Clients.All.SendAsync(method: "ReceiveMessage", arg1: "admin", $"{conn.Username} has joined");
+        //}
 
+        //public async Task JoinSpecificChatRoom(UserConnection conn)
+        //{
+        //    await Groups.AddToGroupAsync(Context.ConnectionId, groupName: conn.ChatRoom);
+
+        //    _shared.connections[Context.ConnectionId] = conn;
+
+        //    await Clients.Group(conn.ChatRoom).SendAsync(method: "JoinSpecificChatRoom", arg1: "admin", 
+        //        $"{conn.Username} has joined {conn.ChatRoom}");
+        //}
+
+        //public async Task SendMessage(string msg)
+        //{
+        //    if(_shared.connections.TryGetValue(Context.ConnectionId, out UserConnection conn))
+        //    {
+        //        await Clients.Group(conn.ChatRoom).SendAsync(
+        //            method: "ReceiveSpecificMessage",
+        //            arg1: conn.Username,
+        //            arg2: msg
+        //        );
+        //    }
+        //}
         public async Task SendMessage(string receiverUserId, string message, int conversationId)
         {
             string senderUserId = Context.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
@@ -44,7 +69,7 @@ namespace CP.SignalR.Hubs
             }
         }
 
-        public async Task<int> SendFriendRequest(FriendRequestDto requestDto)
+        public async Task<int> SendFriendRequest(FriendRequestDto requestDto) 
         {
             string senderUserId = Context.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
             requestDto.UserId = senderUserId;
@@ -73,6 +98,16 @@ namespace CP.SignalR.Hubs
         public async Task SendFriendRequestAccepted(int friendRequestId, int conversationId, string receiverUserId)
         {
             await Clients.User(receiverUserId).SendAsync(SignalRClient.ReceiveFriendRequestAccepted, friendRequestId, conversationId);
+        }
+
+        public async Task SendContactProfileImageChanged(string profileImage)
+        {
+            string userId = Context.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+            var onlineContacts = await GetOnlineContacts(userId);
+            foreach (var contactId in onlineContacts)
+            {
+                await Clients.User(contactId).SendAsync(SignalRClient.ReceiveContactProfileImageChanged, userId, profileImage);
+            }
         }
 
         public async override Task OnConnectedAsync()

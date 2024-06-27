@@ -1,4 +1,5 @@
 ﻿using CP.Models.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace CP.Services.Interfaces
 {
@@ -9,5 +10,7 @@ namespace CP.Services.Interfaces
         Task<List<ContactSearchDto>> SearchPeople(string userId, string query, CancellationToken cancellationToken);
         Task<ContactSearchDto> GetFriendRequestSenderUser(string userId);
         Task<Status> SetAvailabilityStatus(AvailabilityStatusModel availabilityStatus);
+
+        Task<ServiceResponse<string>> SaveFileAsync(IFormFile file, string userId);
     }
 }

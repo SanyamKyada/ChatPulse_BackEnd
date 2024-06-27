@@ -1,5 +1,3 @@
-
-using Azure.Core;
 using CP.Data.Domain;
 using CP.Data.Repositories.Implementations;
 using CP.Data.Repositories.Interfaces;
@@ -58,7 +56,7 @@ namespace CP.BackEnd
                             {
                                 context.Token = context.Request.Query["access_token"];
                             }
-                            return  Task.CompletedTask;
+                            return Task.CompletedTask;
                         },
                         //Return 401 instead of redirecting to Login When authorization fails
                         OnChallenge = context =>
@@ -111,6 +109,7 @@ namespace CP.BackEnd
                 opt.AddPolicy(name: "reactApp", configurePolicy: builder =>
                 {
                     builder.WithOrigins("http://localhost:5173")
+                    //builder.WithOrigins("https://chatpulse-omega.vercel.app")
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials();
@@ -129,6 +128,8 @@ namespace CP.BackEnd
             }
 
             app.UseHttpsRedirection();
+
+            app.UseStaticFiles();
 
             app.UseCors("reactApp"); // registered above defined policy
 

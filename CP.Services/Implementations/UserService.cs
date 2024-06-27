@@ -2,6 +2,7 @@
 using CP.Models.Entities;
 using CP.Models.Models;
 using CP.Services.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -81,6 +82,60 @@ namespace CP.Services.Implementations
 
             status.StatusCode = 200;
             status.Message = "Status updated successfuly";
+            return status;
+        }
+
+        public async Task<ServiceResponse<string>> SaveFileAsync(IFormFile file, string userId)
+        {
+            var status = new ServiceResponse<string>();
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+            {
+                status.StatusCode = 404;
+                status.Message = "User not found while updating availability status";
+                return status;
+            }
+
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/profile-images");
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+
+            string fileExtension = Path.GetExtension(file.FileName);
+            string uniqueFileName = $"profile_image_{Guid.NewGuid()}{fileExtension}";
+            string fullPath = Path.Combine(path, uniqueFileName);
+
+            try
+            {
+                using (var stream = new FileStream(fullPath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+            }
+            catch (Exception ex)
+            {
+                status.StatusCode = 500;
+                status.Message = $"Error saving file: {ex.Message}";
+                return status;
+            }
+
+            user.ProfileImage = $"profile-images/{uniqueFileName}";
+            var result = await _userManager.UpdateAsync(user);
+
+            if (result.Succeeded)
+            {
+                status.StatusCode = 200;
+                status.Message = "Profile image uploaded successfuly";
+                status.Data = user.ProfileImage;
+            }
+            else
+            {
+                status.StatusCode = 500;
+                status.Message = "Failed to update user profile image.";
+            }
+
             return status;
         }
     }

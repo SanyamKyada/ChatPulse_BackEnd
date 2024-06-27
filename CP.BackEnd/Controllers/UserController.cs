@@ -38,5 +38,20 @@ namespace CP.API.Controllers
 
             return Ok(response);
         }
+
+        [HttpPost("{userId}/image-upload")]
+        public async Task<ActionResult> UploadProfileImage(IFormFile file, string userId)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest("No file uploaded.");
+
+            userId = userId ?? User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+
+            if(string.IsNullOrEmpty(userId))
+                return BadRequest("UserId can't be null.");
+
+            var response = await _userService.SaveFileAsync(file, userId);
+            return Ok(new {statusCode = response.StatusCode, message = response.Message, filePath = response.Data});
+        }
     }
 }

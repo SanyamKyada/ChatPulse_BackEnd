@@ -117,7 +117,8 @@ namespace CP.BackEnd.Controllers
                         userId = user.Id,
                         userName = user.Name,
                         availabilityStatus = user.AvailabilityStatus,
-                        email = user.Email
+                        email = user.Email,
+                        profileImage = user.ProfileImage,
                     });
                 }
                 else
